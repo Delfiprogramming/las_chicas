@@ -110,7 +110,7 @@ cargaLisProf!public! !
 inicio!public! !
 menu!public! !
 !
-
+putas
 Persona guid: (GUID fromString: '{e058e5f6-559b-4727-a59e-5cb3932eb0a1}')!
 Persona comment: ''!
 !Persona categoriesForClass!Kernel-Objects! !
