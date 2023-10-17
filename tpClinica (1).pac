@@ -13,6 +13,7 @@ package classNames
 	add: #PacienteParticular;
 	add: #Persona;
 	add: #Profesional;
+	add: #Reunion;
 	add: #Servicio;
 	yourself.
 
@@ -68,13 +69,18 @@ Persona subclass: #Profesional
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 Servicio subclass: #Consulta
-	instanceVariableNames: 'profesional'
+	instanceVariableNames: 'profesional fechaConsulta'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 Servicio subclass: #Gimnasia
-	instanceVariableNames: 'tipo'
+	instanceVariableNames: 'tipo fechaGimnasia'
 	classVariableNames: 'Costo'
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+Servicio subclass: #Reunion
+	instanceVariableNames: 'profesional costo fechaReunion'
+	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 
@@ -121,7 +127,7 @@ cargaPaciente
 
 |op paciente obra aux op2|
 op:=0.
-(op=1|op=2)whileFalse: [op:=(Prompter prompt: 'Ingrese una opcion: PACIENTE PARTICULAR [1], PACIENTE CON OBRA SOCIAL[2]' )asNumber asInteger.
+[op=1|op=2]whileFalse: [op:=(Prompter prompt: 'Ingrese una opcion: PACIENTE PARTICULAR [1], PACIENTE CON OBRA SOCIAL[2]' )asNumber asInteger.
 ].
 (op=1)ifTrue: [
 paciente:= PacienteParticular new.
@@ -133,18 +139,19 @@ pacintes add: paciente.
 (op=2)ifTrue: [
 obra:=(Prompter prompt: 'Ingrese codigo de su obra social: ' )asNumber asInteger.
 aux:= self busquedaObra: obra.
+
 (aux=nil)ifTrue: [
 op2:=0.
-(op2=1|op2=2)whileFalse: [op2:=(Prompter prompt: 'Su obra social no es aceptada en la clinica. Desea continuar como paciente particular? SI(1)NO(2) ')asNumber asInteger].
+[op2=1|op2=2]whileFalse: [op2:=(Prompter prompt: 'Su obra social no es aceptada en la clinica. Desea continuar como paciente particular? SI(1)NO(2) ')asNumber asInteger].
 (op2=1)ifTrue: [
 paciente:= PacienteParticular new.
 paciente cargaDatosPer.
 pacintes add: paciente].].
 
-(aux=obra)ifTrue: [
+(aux~=nil)ifTrue: [
 paciente:= PacienteObraSocial new.
 paciente cargaDatosPer.
-PacienteObraSocial obra: obra.
+paciente obra: obra.
 pacintes add: paciente.
 ]
 
@@ -156,8 +163,68 @@ pacintes add: paciente.
 !
 
 cargaServicio
+|op op2 op3 serv profe auxiliar auxMatricula auxNombre auxCosto auxCostoTotal fecha|
+op:=0.
+[op=0]whileTrue: [
+op3:=0.
+auxiliar:=nil.
+op2:=0.
+[op2=2|op2=1|op2=3]whileFalse: [
+op2:=(Prompter prompt: 'Ingrese el servicio que va a proveer: REUNION(1),GIMNASIA(2),CONSULTA(3). ' )asNumber asInteger.
+].
 
-||!
+(op2=1)ifTrue: [
+serv:= Reunion new.
+[auxiliar =nil & op3=0]whileTrue: [
+profe:=(Prompter prompt: 'Ingrese la matricula de un profesional:  ' ).
+auxiliar:=self busquedaProfesional: profe.
+(auxiliar =nil)ifTrue: [
+op3:=4.
+[op3=0|op3=1]whileFalse: [
+op3:=(Prompter prompt: 'La matricula ingresada no esta cargada en el sistema, desea ingresar otra SI(0), NO(1):  ' )asNumber asInteger .].].].
+(auxiliar ~= nil)ifTrue: [
+auxCosto:=(Prompter prompt: 'Ingrese la tarifa de la reunion:' )asNumber .
+
+auxCosto:= auxCosto +auxiliar tarifaReunion. 
+auxNombre:=( auxiliar nombre, auxiliar apellido).
+fecha:= Date fromString: (Prompter prompt: 'Ingrese la fecha de la reunion: ' ).
+serv fechaReunion:  fecha.
+serv costo: auxCosto.
+serv profesional: auxNombre .
+servicios add: serv.].].
+
+(op2=3)ifTrue: [
+serv:= Consulta new.
+[auxiliar =nil & op3=0]whileTrue: [
+profe:=(Prompter prompt: 'Ingrese la matricula de un profesional:  ' ).
+auxiliar:=self busquedaProfesional: profe.
+(auxiliar =nil)ifTrue: [
+op3:=4.
+[op3=0|op3=1]whileFalse: [
+op3:=(Prompter prompt: 'La matricula ingresada no esta cargada en el sistema, desea ingresar otra SI(0), NO(1):  ' )asNumber asInteger .].].].
+(auxiliar ~= nil)ifTrue: [
+fecha:= Date fromString: (Prompter prompt: 'Ingrese la fecha de la consulta ' ).
+auxCosto:= auxiliar tarifaConsulta . 
+auxNombre:=( auxiliar nombre, auxiliar apellido).
+
+serv fechaConsulta:fecha.
+serv costo: auxCosto.
+serv profesional: auxNombre .
+servicios add: serv.].].
+
+(op2=2)ifTrue: [
+serv:= Gimnasia new.
+fecha:= Date fromString: (Prompter prompt: 'Ingrese la fecha de la consulta ' ).
+serv fechaGimnasia:fecha.
+servicios add: serv.].].
+op:=3.
+[op=0|op=1]whileFalse: [
+op:=(Prompter prompt: 'Desea ingresar otro servicio? SI(0), NO(1) ')asNumber asInteger.
+].
+
+
+
+!
 
 inicio
 listadoObra:=OrderedCollection new.
@@ -411,9 +478,17 @@ Consulta comment: ''!
 
 asignaProfesional
 
-! !
+!
+
+fechaConsulta
+	^fechaConsulta!
+
+fechaConsulta: anObject
+	fechaConsulta := anObject! !
 !Consulta categoriesForMethods!
 asignaProfesional!public! !
+fechaConsulta!accessing!private! !
+fechaConsulta:!accessing!private! !
 !
 
 Gimnasia guid: (GUID fromString: '{811f99da-cb73-4030-8941-c48870c7fa1c}')!
@@ -425,6 +500,12 @@ cargaTipo
 self cargaServicio.
 self tipo: (Prompter prompt: 'Ingrese que tipo de actividad que se dicta:' ).!
 
+fechaGimnasia
+	^fechaGimnasia!
+
+fechaGimnasia: anObject
+	fechaGimnasia := anObject!
+
 tipo
 	^tipo!
 
@@ -432,6 +513,8 @@ tipo: anObject
 	tipo := anObject! !
 !Gimnasia categoriesForMethods!
 cargaTipo!public! !
+fechaGimnasia!accessing!private! !
+fechaGimnasia:!accessing!private! !
 tipo!accessing!private! !
 tipo:!accessing!private! !
 !
@@ -443,6 +526,42 @@ Costo:=(Prompter prompt: 'Ingrese el costo: ' ).
 ^Costo! !
 !Gimnasia class categoriesForMethods!
 asignarCosto!public! !
+!
+
+Reunion guid: (GUID fromString: '{159db888-aa18-4f0b-8c81-0c3b31fe0c66}')!
+Reunion comment: ''!
+!Reunion categoriesForClass!Kernel-Objects! !
+!Reunion methodsFor!
+
+cargaCosto
+
+self costo: (Prompter prompt: 'Ingrese costo de la reunion: ')asNumber .!
+
+costo
+	^costo!
+
+costo: anObject
+	costo := anObject!
+
+fechaReunion
+	^fechaReunion!
+
+fechaReunion: anObject
+	fechaReunion := anObject!
+
+profesional
+	^profesional!
+
+profesional: anObject
+	profesional := anObject! !
+!Reunion categoriesForMethods!
+cargaCosto!public! !
+costo!accessing!private! !
+costo:!accessing!private! !
+fechaReunion!accessing!private! !
+fechaReunion:!accessing!private! !
+profesional!accessing!private! !
+profesional:!accessing!private! !
 !
 
 "Binary Globals"!
