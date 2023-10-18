@@ -8,6 +8,7 @@ package classNames
 	add: #Clinica;
 	add: #Consulta;
 	add: #Gimnasia;
+	add: #Minuta;
 	add: #ObraSocial;
 	add: #PacienteObraSocial;
 	add: #PacienteParticular;
@@ -27,14 +28,20 @@ package setPrerequisites: #(
 	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin'
 	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Legacy Date & Time'
 	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Message Box'
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\MVP\Presenters\Prompters\Dolphin Prompter').
+	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\MVP\Presenters\Prompters\Dolphin Prompter'
+	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\System\Random\Dolphin Random Stream').
 
 package!
 
 "Class Definitions"!
 
 Object subclass: #Clinica
-	instanceVariableNames: 'listadoProf listadoObra servicios pacintes'
+	instanceVariableNames: 'listadoProf listadoObra minutas pacintes'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+Object subclass: #Minuta
+	instanceVariableNames: 'fechaMinuta peso pacienteMinuta servicioMinuta'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -106,9 +113,20 @@ busquedaObra: anObject
 retorno:=listadoObra detect: [:i | i codigo= anObject] ifNone: [nil].
 ^retorno!
 
+busquedaPaciente: anObject
+|retorno|
+retorno:= pacintes detect: [:i | i nroDoc = anObject] ifNone: [nil].
+^retorno!
+
 busquedaProfesional: anObject
 |retorno|
 retorno:=listadoProf detect: [:i | i matricula = anObject] ifNone: [nil].
+^retorno!
+
+busquedaProfEsp: anObject
+|retorno subEspecialidad|
+subEspecialidad:= listadoProf select: [:i | i especialidad =anObject ]. 
+retorno:= subEspecialidad at: (Random new next: subEspecialidad  size).
 ^retorno!
 
 cargaLisProf
@@ -122,6 +140,97 @@ opcion:= Prompter prompt: 'Desea agregar a un nuevo profesional: SI(0), NO(1)'
 ]
 
 !
+
+cargaMinuta
+|op op2 op3 serv profe auxiliar auxMatricula auxNombre auxCosto auxCostoTotal fecha dni auxDni minuta profAleatorio espe|
+op:=0.
+[op=0]whileTrue: [
+op3:=0.
+auxiliar:=nil.
+op2:=0.
+auxDni:=nil.
+
+
+[auxDni =nil & op3=0]whileTrue: [
+dni:=(Prompter prompt: 'Ingrese su numero de documento: ' )asNumber asInteger.
+auxDni:=self busquedaPaciente: dni.
+(auxDni =nil)ifTrue: [
+op3:=4.
+[op3=0|op3=1]whileFalse: [
+op3:=(Prompter prompt: 'No se encontro su numero de documento, desea ingresar otro? SI(0), NO(1):  ' )asNumber asInteger .]
+.].].
+
+(auxDni~= nil)ifTrue: [
+minuta:= Minuta new.
+minuta fechaMinuta: (Date today).
+minuta peso: (Prompter prompt: 'Ingrese su peso: ' )asNumber.
+[op2=2|op2=1|op2=3]whileFalse: [
+op2:=(Prompter prompt: 'Ingrese el servicio que desea realizar: REUNION(1),GIMNASIA(2),CONSULTA(3). ' )asNumber asInteger.].
+
+(op2=1)ifTrue: [
+serv:= Reunion new.
+[auxiliar =nil]whileTrue: [
+profAleatorio:=(listadoProf at: (Random new next: listadoProf size)).
+serv profesional:profAleatorio.
+"FALTA COSTO"
+serv fechaReunion: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la reunion: ' )).
+minuta servicioMinuta: serv.].].
+
+(op2=2)ifTrue: [
+serv:= Gimnasia new.
+[auxiliar =nil]whileTrue: [
+serv fechaGimnasia: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la sesion de gimnasia: ' )).
+minuta servicioMinuta: serv.].].
+
+(op2=3)ifTrue: [
+serv:= Consulta new.
+[auxiliar =nil]whileTrue: [
+espe:=0.
+[espe=1|espe=2|espe =3]whileFalse: [
+espe:=(Prompter  prompt: 'Ingrese la especialidad. MEDICO CLINICO(1), PSICOLOGO(2), NUTRICIONISTA(3)' )asNumber asInteger.
+].
+(espe=1)ifTrue: [
+espe:='medico'.
+].
+(espe=2)ifTrue: [
+espe:='psicologo'.
+].
+(espe=3)ifTrue: [
+espe:='nutricionista'.
+].
+
+serv profesional: (self busquedaProfEsp: espe) .
+"FALTA COSTO"
+serv fechaReunion: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la reunion: ' )).
+minuta servicioMinuta: serv.].].].]
+
+
+
+
+
+
+
+
+
+
+
+!
+
+cargaObras
+
+|op  obra|
+op:=0.
+[op=0]whileTrue: [
+obra:= ObraSocial new.
+obra nombre: (Prompter prompt: 'Ingrese el nombre de la obra social: ').
+obra codigo:  (Prompter prompt: 'Ingrese el codigo de la obra social: ')asNumber asInteger.
+obra porcentaje: (Prompter prompt: 'Ingrese el porcentaje de cobertura de la obra social: ')asNumber.
+listadoObra add: obra.
+op:=3.
+[op=0|op=1]whileFalse: [
+op:= (Prompter prompt: 'Desea cargar una nueva obra social? SI(0), NO(1): ').
+].
+].!
 
 cargaPaciente
 
@@ -190,8 +299,7 @@ auxNombre:=( auxiliar nombre, auxiliar apellido).
 fecha:= Date fromString: (Prompter prompt: 'Ingrese la fecha de la reunion: ' ).
 serv fechaReunion:  fecha.
 serv costo: auxCosto.
-serv profesional: auxNombre .
-servicios add: serv.].].
+serv profesional: auxNombre .].].
 
 (op2=3)ifTrue: [
 serv:= Consulta new.
@@ -209,14 +317,12 @@ auxNombre:=( auxiliar nombre, auxiliar apellido).
 
 serv fechaConsulta:fecha.
 serv costo: auxCosto.
-serv profesional: auxNombre .
-servicios add: serv.].].
+serv profesional: auxNombre .].].
 
 (op2=2)ifTrue: [
 serv:= Gimnasia new.
 fecha:= Date fromString: (Prompter prompt: 'Ingrese la fecha de la consulta ' ).
-serv fechaGimnasia:fecha.
-servicios add: serv.].].
+serv fechaGimnasia:fecha.].].
 op:=3.
 [op=0|op=1]whileFalse: [
 op:=(Prompter prompt: 'Desea ingresar otro servicio? SI(0), NO(1) ')asNumber asInteger.
@@ -230,11 +336,11 @@ inicio
 listadoObra:=OrderedCollection new.
 listadoProf:=OrderedCollection new.
 pacintes:=OrderedCollection new.
-servicios:= OrderedCollection new.
+minutas:= OrderedCollection new.
 !
 
 menu
-|op tipo|
+|op tipo opAct|
 tipo:=0. 
 tipo:=(Prompter prompt: 'Paciente [1] Personal  [2]' )asNumber asInteger .
 [tipo=1|tipo=2]whileFalse: [
@@ -245,17 +351,19 @@ op:=4.
 [op=0]whileFalse: [MessageBox notify: '
 MENU:
 1-Registrarse
-2- Sacar turno
-3-Listado profesional
-4-Listado obras
+2- Solicitar servicio
+3-Listado obras
 0-Salir'.
 op:=(Prompter prompt: 'Ingrese opcion: ' )asNumber asInteger.
-[op=1|op=2|op=3|op=4|op=0]whileFalse: [
+[op=1|op=2|op=3|op=0]whileFalse: [
 op:=(Prompter prompt: 'Ingrese opcion: ' )asNumber asInteger.
 ].
 [op=1]ifTrue: [
-
-]
+self cargaPaciente.].
+[op=2]ifTrue: [
+self cargaPaciente.].
+[op=3]ifTrue: [
+self cargaPaciente.].
 ].
 ].
 [tipo=2]ifTrue: [
@@ -264,26 +372,77 @@ op:=7.
 MENU:
 1-Registrar profesional
 2- Registrar obra social
-3-Servicio
-4-Registrar minuta
-5-Listado de facturacion
-6-Listado Profesional
-7-Listado obras
+3-Listado de facturacion
+4-Cotizar actividades 
 0-Salir'.
 op:=(Prompter prompt: 'Ingrese opcion: ' )asNumber asInteger.
-[op=1|op=2|op=3|op=4|op=5|op=6|op=7|op=0]whileFalse: [
+[op=1|op=2|op=3|op=0]whileFalse: [
 op:=(Prompter prompt: 'Ingrese opcion: ' )asNumber asInteger.
 ].
+[op=1]ifTrue: [
+self cargaLisProf .].
+[op=2]ifTrue: [
+].
+[op=3]ifTrue: [
+self cargaPaciente.].
+[op=4]ifTrue: [
+opAct:=(Prompter prompt: 'Ingrese que actividad quiere cotizar: REUNION(1), GIMNASIA(2)' )asNumber asInteger].
+(opAct=1)ifTrue: [
+
+]
 ].
 ].! !
 !Clinica categoriesForMethods!
 busquedaObra:!public! !
+busquedaPaciente:!public! !
 busquedaProfesional:!public! !
+busquedaProfEsp:!public! !
 cargaLisProf!public! !
+cargaMinuta!public! !
+cargaObras!public! !
 cargaPaciente!public! !
 cargaServicio!public! !
 inicio!public! !
 menu!public! !
+!
+
+Minuta guid: (GUID fromString: '{abff84a2-3d57-4eb3-87e0-8647aefad215}')!
+Minuta comment: ''!
+!Minuta categoriesForClass!Kernel-Objects! !
+!Minuta methodsFor!
+
+fechaMinuta
+	^fechaMinuta!
+
+fechaMinuta: anObject
+	fechaMinuta := anObject!
+
+pacienteMinuta
+	^pacienteMinuta!
+
+pacienteMinuta: anObject
+	pacienteMinuta := anObject!
+
+peso
+	^peso!
+
+peso: anObject
+	peso := anObject!
+
+servicioMinuta
+	^servicioMinuta!
+
+servicioMinuta: anObject
+	servicioMinuta := anObject! !
+!Minuta categoriesForMethods!
+fechaMinuta!accessing!private! !
+fechaMinuta:!accessing!private! !
+pacienteMinuta!accessing!private! !
+pacienteMinuta:!accessing!private! !
+peso!accessing!private! !
+peso:!accessing!private! !
+servicioMinuta!accessing!private! !
+servicioMinuta:!accessing!private! !
 !
 
 ObraSocial guid: (GUID fromString: '{e01d34a5-3383-4f64-a066-6fc00fb78f68}')!
