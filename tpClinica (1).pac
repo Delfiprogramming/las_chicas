@@ -25,11 +25,11 @@ package globalAliases: (Set new
 	yourself).
 
 package setPrerequisites: #(
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin'
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Legacy Date & Time'
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Message Box'
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\MVP\Presenters\Prompters\Dolphin Prompter'
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\System\Random\Dolphin Random Stream').
+	'C:\Users\IPP\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin'
+	'C:\Users\IPP\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Legacy Date & Time'
+	'C:\Users\IPP\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Message Box'
+	'C:\Users\IPP\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\MVP\Presenters\Prompters\Dolphin Prompter'
+	'C:\Users\IPP\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\System\Random\Dolphin Random Stream').
 
 package!
 
@@ -56,7 +56,7 @@ Object subclass: #Persona
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 Object subclass: #Servicio
-	instanceVariableNames: 'descripcion fecha'
+	instanceVariableNames: 'descripcion fechaServicio'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -76,17 +76,17 @@ Persona subclass: #Profesional
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 Servicio subclass: #Consulta
-	instanceVariableNames: 'profesional fechaConsulta'
+	instanceVariableNames: 'profesional'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 Servicio subclass: #Gimnasia
-	instanceVariableNames: 'tipo fechaGimnasia'
+	instanceVariableNames: 'tipo'
 	classVariableNames: 'Costo'
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 Servicio subclass: #Reunion
-	instanceVariableNames: 'profesional costo fechaReunion'
+	instanceVariableNames: 'profesional costo'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -129,12 +129,21 @@ subEspecialidad:= listadoProf select: [:i | i especialidad =anObject ].
 retorno:= subEspecialidad at: (Random new next: subEspecialidad  size).
 ^retorno!
 
+busquedaSubObras:anObject
+|subObras paciente codObra|
+subObras:= OrderedCollection new.
+subObras:= minutas select: [:i | paciente := i pacienteMinuta.
+codObra:=paciente obraSocial .
+codObra =anObject. ]. 
+^subObras!
+
 cargaLisProf
 |prof opcion|
 opcion:=0.
 [opcion=0]whileTrue: [prof:= Profesional new.
 prof cargaDatosPer.
 prof cargaDatosProfe.
+
 listadoProf add: prof.
 opcion:= Prompter prompt: 'Desea agregar a un nuevo profesional: SI(0), NO(1)'
 ]
@@ -142,7 +151,7 @@ opcion:= Prompter prompt: 'Desea agregar a un nuevo profesional: SI(0), NO(1)'
 !
 
 cargaMinuta
-|op op2 op3 serv profe auxiliar auxMatricula auxNombre auxCosto auxCostoTotal fecha dni auxDni minuta profAleatorio espe|
+|op op2 op3 serv auxiliar auxCosto dni auxDni minuta profAleatorio espe|
 op:=0.
 [op=0]whileTrue: [
 op3:=0.
@@ -152,34 +161,40 @@ auxDni:=nil.
 
 
 [auxDni =nil & op3=0]whileTrue: [
-dni:=(Prompter prompt: 'Ingrese su numero de documento: ' )asNumber asInteger.
+dni:=(Prompter prompt: 'Ingrese el numero de documento del paciente: ' )asNumber asInteger.
 auxDni:=self busquedaPaciente: dni.
 (auxDni =nil)ifTrue: [
 op3:=4.
 [op3=0|op3=1]whileFalse: [
-op3:=(Prompter prompt: 'No se encontro su numero de documento, desea ingresar otro? SI(0), NO(1):  ' )asNumber asInteger .]
+op3:=(Prompter prompt: 'No se encontro el paciente, desea ingresar otro? SI(0), NO(1):  ' )asNumber asInteger .]
 .].].
 
 (auxDni~= nil)ifTrue: [
 minuta:= Minuta new.
 minuta fechaMinuta: (Date today).
-minuta peso: (Prompter prompt: 'Ingrese su peso: ' )asNumber.
+minuta peso: (Prompter prompt: 'Ingrese el peso del paciente: ' )asNumber.
+minuta pacienteMinuta: auxDni.
 [op2=2|op2=1|op2=3]whileFalse: [
-op2:=(Prompter prompt: 'Ingrese el servicio que desea realizar: REUNION(1),GIMNASIA(2),CONSULTA(3). ' )asNumber asInteger.].
+op2:=(Prompter prompt: 'Ingrese el servicio que desea realizar el paciente: REUNION(1),GIMNASIA(2),CONSULTA(3). ' )asNumber asInteger.].
 
 (op2=1)ifTrue: [
 serv:= Reunion new.
 [auxiliar =nil]whileTrue: [
 profAleatorio:=(listadoProf at: (Random new next: listadoProf size)).
 serv profesional:profAleatorio.
-"FALTA COSTO"
-serv fechaReunion: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la reunion: ' )).
+auxCosto:=(Prompter prompt: 'Ingrese el costo de la reunion: ' ).
+auxCosto:=auxCosto+ profAleatorio costo.
+serv costo: auxCosto .
+serv fechaServicio: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la reunion: ' )).
+serv descripcion: (Prompter prompt: 'Ingrese la descripcion de la reunion: ' ).
 minuta servicioMinuta: serv.].].
 
 (op2=2)ifTrue: [
 serv:= Gimnasia new.
 [auxiliar =nil]whileTrue: [
-serv fechaGimnasia: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la sesion de gimnasia: ' )).
+serv fechaServicio: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la sesion de gimnasia: ' )).
+serv tipo: (Prompter prompt: 'Ingrese el tipo de gimnasia ' ).
+serv descripcion: (Prompter prompt: 'Ingrese la descripcion de la clase de gimnasia: ' ).
 minuta servicioMinuta: serv.].].
 
 (op2=3)ifTrue: [
@@ -198,11 +213,17 @@ espe:='psicologo'.
 (espe=3)ifTrue: [
 espe:='nutricionista'.
 ].
+profAleatorio:=(self busquedaProfEsp: espe) .
+serv profesional:profAleatorio.
+serv costo: profAleatorio costo.
+serv fechaServicio: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la consulta ' )).
+serv descripcion: (Prompter prompt: 'Ingrese la descripcion de la consulta: ' ).
+minuta servicioMinuta: serv.].].].
+minutas add: minuta.
 
-serv profesional: (self busquedaProfEsp: espe) .
-"FALTA COSTO"
-serv fechaReunion: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la reunion: ' )).
-minuta servicioMinuta: serv.].].].]
+op:=(Prompter prompt: 'Desea ingresar otra minuta SI(0) NO(1)' )asNumber asInteger .
+
+]
 
 
 
@@ -271,67 +292,6 @@ pacintes add: paciente.
 
 !
 
-cargaServicio
-|op op2 op3 serv profe auxiliar auxMatricula auxNombre auxCosto auxCostoTotal fecha|
-op:=0.
-[op=0]whileTrue: [
-op3:=0.
-auxiliar:=nil.
-op2:=0.
-[op2=2|op2=1|op2=3]whileFalse: [
-op2:=(Prompter prompt: 'Ingrese el servicio que va a proveer: REUNION(1),GIMNASIA(2),CONSULTA(3). ' )asNumber asInteger.
-].
-
-(op2=1)ifTrue: [
-serv:= Reunion new.
-[auxiliar =nil & op3=0]whileTrue: [
-profe:=(Prompter prompt: 'Ingrese la matricula de un profesional:  ' ).
-auxiliar:=self busquedaProfesional: profe.
-(auxiliar =nil)ifTrue: [
-op3:=4.
-[op3=0|op3=1]whileFalse: [
-op3:=(Prompter prompt: 'La matricula ingresada no esta cargada en el sistema, desea ingresar otra SI(0), NO(1):  ' )asNumber asInteger .].].].
-(auxiliar ~= nil)ifTrue: [
-auxCosto:=(Prompter prompt: 'Ingrese la tarifa de la reunion:' )asNumber .
-
-auxCosto:= auxCosto +auxiliar tarifaReunion. 
-auxNombre:=( auxiliar nombre, auxiliar apellido).
-fecha:= Date fromString: (Prompter prompt: 'Ingrese la fecha de la reunion: ' ).
-serv fechaReunion:  fecha.
-serv costo: auxCosto.
-serv profesional: auxNombre .].].
-
-(op2=3)ifTrue: [
-serv:= Consulta new.
-[auxiliar =nil & op3=0]whileTrue: [
-profe:=(Prompter prompt: 'Ingrese la matricula de un profesional:  ' ).
-auxiliar:=self busquedaProfesional: profe.
-(auxiliar =nil)ifTrue: [
-op3:=4.
-[op3=0|op3=1]whileFalse: [
-op3:=(Prompter prompt: 'La matricula ingresada no esta cargada en el sistema, desea ingresar otra SI(0), NO(1):  ' )asNumber asInteger .].].].
-(auxiliar ~= nil)ifTrue: [
-fecha:= Date fromString: (Prompter prompt: 'Ingrese la fecha de la consulta ' ).
-auxCosto:= auxiliar tarifaConsulta . 
-auxNombre:=( auxiliar nombre, auxiliar apellido).
-
-serv fechaConsulta:fecha.
-serv costo: auxCosto.
-serv profesional: auxNombre .].].
-
-(op2=2)ifTrue: [
-serv:= Gimnasia new.
-fecha:= Date fromString: (Prompter prompt: 'Ingrese la fecha de la consulta ' ).
-serv fechaGimnasia:fecha.].].
-op:=3.
-[op=0|op=1]whileFalse: [
-op:=(Prompter prompt: 'Desea ingresar otro servicio? SI(0), NO(1) ')asNumber asInteger.
-].
-
-
-
-!
-
 inicio
 listadoObra:=OrderedCollection new.
 listadoProf:=OrderedCollection new.
@@ -339,70 +299,90 @@ pacintes:=OrderedCollection new.
 minutas:= OrderedCollection new.
 !
 
+listadoObras
+|codObra fechaInicio fechaFin auxObra subObras listado suma auxMin op |
+op:=0.
+auxObra:=nil.
+[op=0|auxObra=nil]whileTrue: [
+codObra:=(Prompter prompt: 'Ingrese el codigo de la obra social' )asNumber asInteger .
+auxObra:= self busquedaObra: codObra.
+(auxObra=nil)ifTrue: [
+op:=(Prompter prompt: 'No se encontro la obra. Desea ingresar otra: SI(0) NO(1)' )asNumber asInteger.
+].
+].
+(auxObra ~= nil)ifTrue: [
+subObras:= OrderedCollection new.
+subObras:= self busquedaSubObras: codObra.
+fechaInicio:= Date fromString: (Prompter prompt: 'Ingrese la fecha de inicio' ).
+fechaFin:= Date fromString: (Prompter prompt: 'Ingrese la fecha de fin' ). 
+listado:=OrderedCollection new.
+listado:= subObras select: [:i | ((i servicioMinuta fechaServicio)>=fechaInicio )& ((i servicioMinuta fechaServicio)<=fechaFin ) ].
+suma:=0.
+Transcript show: 'Nombre de la obra social: ', auxObra nombre.
+Transcript cr.
+Transcript show: 'Porcentaje de cobertura: ', auxObra porcentaje .
+Transcript cr.
+Transcript cr.
+listado do: [:i | 
+auxMin:=i.
+Transcript show: 'Fecha minuta: ',auxMin fechaMinuta.
+Transcript cr.
+Transcript show: 'Fecha servicio: ',auxMin servicioMinuta fechaServicio.
+Transcript cr.
+Transcript show: 'Nombre y apellido paciente: ',auxMin servicioMinuta pacienteMinuta nombre, auxMin servicioMinuta pacienteMinuta apellido .
+Transcript cr.
+Transcript show: 'Descripcion servicio: ',auxMin servicioMinuta descripcion.
+Transcript cr.
+Transcript show: 'Costo actividad: ',auxMin servicioMinuta costo.
+suma:=suma+((auxMin servicioMinuta costo)*(auxObra porcentaje)) / 100.
+Transcript cr.
+Transcript show: 'Importe a pagar por la obra social: ',((auxMin servicioMinuta costo)*(auxObra porcentaje)) / 100.].
+Transcript cr.
+Transcript show: 'Importe total a pagar por la obra social: ', suma.
+]!
+
 menu
-|op tipo opAct|
-tipo:=0. 
-tipo:=(Prompter prompt: 'Paciente [1] Personal  [2]' )asNumber asInteger .
-[tipo=1|tipo=2]whileFalse: [
-tipo:=(Prompter prompt: 'Paciente [1] Personal  [2]' )asNumber asInteger .
-].
-[tipo=1]ifTrue: [
-op:=4.
-[op=0]whileFalse: [MessageBox notify: '
-MENU:
-1-Registrarse
-2- Solicitar servicio
-3-Listado obras
-0-Salir'.
-op:=(Prompter prompt: 'Ingrese opcion: ' )asNumber asInteger.
-[op=1|op=2|op=3|op=0]whileFalse: [
-op:=(Prompter prompt: 'Ingrese opcion: ' )asNumber asInteger.
-].
-[op=1]ifTrue: [
-self cargaPaciente.].
-[op=2]ifTrue: [
-self cargaPaciente.].
-[op=3]ifTrue: [
-self cargaPaciente.].
-].
-].
-[tipo=2]ifTrue: [
+|op|
 op:=7.
 [op=0]whileFalse: [MessageBox notify: '
 MENU:
-1-Registrar profesional
+1- Registrar profesional
 2- Registrar obra social
-3-Listado de facturacion
-4-Cotizar actividades 
+3- Registrar paciente
+4- Registrar minuta
+5- Listado de facturacion
+6-Costo gimnasia
 0-Salir'.
 op:=(Prompter prompt: 'Ingrese opcion: ' )asNumber asInteger.
-[op=1|op=2|op=3|op=0]whileFalse: [
+[op=1|op=2|op=3|op=0|op=4|op=5|op=6]whileFalse: [
 op:=(Prompter prompt: 'Ingrese opcion: ' )asNumber asInteger.
 ].
 [op=1]ifTrue: [
 self cargaLisProf .].
 [op=2]ifTrue: [
-].
+self cargaObras .].
 [op=3]ifTrue: [
 self cargaPaciente.].
 [op=4]ifTrue: [
-opAct:=(Prompter prompt: 'Ingrese que actividad quiere cotizar: REUNION(1), GIMNASIA(2)' )asNumber asInteger].
-(opAct=1)ifTrue: [
-
-]
+self cargaMinuta .].
+[op=5]ifTrue: [
+self listadoObras .].
+[op=6]ifTrue: [
+Gimnasia asignarCosto .].
 ].
-].! !
+! !
 !Clinica categoriesForMethods!
 busquedaObra:!public! !
 busquedaPaciente:!public! !
 busquedaProfesional:!public! !
 busquedaProfEsp:!public! !
+busquedaSubObras:!public! !
 cargaLisProf!public! !
 cargaMinuta!public! !
 cargaObras!public! !
 cargaPaciente!public! !
-cargaServicio!public! !
 inicio!public! !
+listadoObras!public! !
 menu!public! !
 !
 
@@ -563,22 +543,34 @@ descripcion
 descripcion: anObject
 	descripcion := anObject!
 
-fecha
-	^fecha!
+fechaServicio
+	^fechaServicio!
 
-fecha: anObject
-	fecha := anObject! !
+fechaServicio: anObject
+	fechaServicio := anObject! !
 !Servicio categoriesForMethods!
 cargaServicio!public! !
 descripcion!accessing!private! !
 descripcion:!accessing!private! !
-fecha!accessing!private! !
-fecha:!accessing!private! !
+fechaServicio!accessing!private! !
+fechaServicio:!accessing!private! !
 !
 
 PacienteObraSocial guid: (GUID fromString: '{96110c90-607c-4489-a131-7bf6bbf06b9f}')!
 PacienteObraSocial comment: ''!
 !PacienteObraSocial categoriesForClass!Kernel-Objects! !
+!PacienteObraSocial methodsFor!
+
+obraSocial
+	^obraSocial!
+
+obraSocial: anObject
+	obraSocial := anObject! !
+!PacienteObraSocial categoriesForMethods!
+obraSocial!accessing!private! !
+obraSocial:!accessing!private! !
+!
+
 PacienteParticular guid: (GUID fromString: '{6551382c-e350-4077-ad8c-2c620fb65486}')!
 PacienteParticular comment: ''!
 !PacienteParticular categoriesForClass!Kernel-Objects! !
@@ -588,12 +580,29 @@ Profesional comment: ''!
 !Profesional methodsFor!
 
 cargaDatosProfe
-
+|espe|
 self cargaDatosPer.
 self tarifaConsulta: (Prompter prompt: 'Ingrese el costo de su consulta: ' )asNumber .
 self tarifaReunion: (Prompter prompt: 'Ingrese el costo de la reunion: ' )asNumber .
 self matricula: (Prompter prompt: 'Ingrese su numero de matricula: ' )asNumber .
-self especialidad:  (Prompter prompt: 'Ingrese su especialidad: ' )asString .!
+espe:= (Prompter prompt: 'Ingrese su especialidad: MEDICO CLINICO(1), PSICOLOGO(2), NUTRICIONISTA(3)' )asNumber .
+(espe=1)ifTrue: [
+espe:='medico'.
+].
+
+(espe=2)ifTrue: [
+espe:='psicologo'.
+].
+
+(espe=3)ifTrue: [
+espe:='nutricionista'.
+].
+
+
+self especialidad: espe.
+
+
+!
 
 especialidad
 	^especialidad!
@@ -637,17 +646,9 @@ Consulta comment: ''!
 
 asignaProfesional
 
-!
-
-fechaConsulta
-	^fechaConsulta!
-
-fechaConsulta: anObject
-	fechaConsulta := anObject! !
+! !
 !Consulta categoriesForMethods!
 asignaProfesional!public! !
-fechaConsulta!accessing!private! !
-fechaConsulta:!accessing!private! !
 !
 
 Gimnasia guid: (GUID fromString: '{811f99da-cb73-4030-8941-c48870c7fa1c}')!
@@ -659,12 +660,6 @@ cargaTipo
 self cargaServicio.
 self tipo: (Prompter prompt: 'Ingrese que tipo de actividad que se dicta:' ).!
 
-fechaGimnasia
-	^fechaGimnasia!
-
-fechaGimnasia: anObject
-	fechaGimnasia := anObject!
-
 tipo
 	^tipo!
 
@@ -672,8 +667,6 @@ tipo: anObject
 	tipo := anObject! !
 !Gimnasia categoriesForMethods!
 cargaTipo!public! !
-fechaGimnasia!accessing!private! !
-fechaGimnasia:!accessing!private! !
 tipo!accessing!private! !
 tipo:!accessing!private! !
 !
@@ -702,12 +695,6 @@ costo
 costo: anObject
 	costo := anObject!
 
-fechaReunion
-	^fechaReunion!
-
-fechaReunion: anObject
-	fechaReunion := anObject!
-
 profesional
 	^profesional!
 
@@ -717,8 +704,6 @@ profesional: anObject
 cargaCosto!public! !
 costo!accessing!private! !
 costo:!accessing!private! !
-fechaReunion!accessing!private! !
-fechaReunion:!accessing!private! !
 profesional!accessing!private! !
 profesional:!accessing!private! !
 !
