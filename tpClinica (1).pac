@@ -223,7 +223,7 @@ minutas add: minuta.
 
 op:=(Prompter prompt: 'Desea ingresar otra minuta SI(0) NO(1)' )asNumber asInteger .
 
-]
+].
 
 
 
@@ -247,18 +247,16 @@ obra nombre: (Prompter prompt: 'Ingrese el nombre de la obra social: ').
 obra codigo:  (Prompter prompt: 'Ingrese el codigo de la obra social: ')asNumber asInteger.
 obra porcentaje: (Prompter prompt: 'Ingrese el porcentaje de cobertura de la obra social: ')asNumber.
 listadoObra add: obra.
-op:=3.
-[op=0|op=1]whileFalse: [
 op:= (Prompter prompt: 'Desea cargar una nueva obra social? SI(0), NO(1): ').
-].
 ].!
 
 cargaPaciente
 
 |op paciente obra aux op2|
 op:=0.
-[op=1|op=2]whileFalse: [op:=(Prompter prompt: 'Ingrese una opcion: PACIENTE PARTICULAR [1], PACIENTE CON OBRA SOCIAL[2]' )asNumber asInteger.
-].
+[op=0]whileTrue: [
+
+op:=(Prompter prompt: 'Ingrese una opcion: PACIENTE PARTICULAR [1], PACIENTE CON OBRA SOCIAL[2]' )asNumber asInteger.
 (op=1)ifTrue: [
 paciente:= PacienteParticular new.
 paciente cargaDatosPer.
@@ -281,10 +279,13 @@ pacintes add: paciente].].
 (aux~=nil)ifTrue: [
 paciente:= PacienteObraSocial new.
 paciente cargaDatosPer.
-paciente obra: obra.
+paciente obraSocial: obra.
 pacintes add: paciente.
-]
+].
 
+].
+
+op:=(Prompter prompt: 'Se ha cargado con exito. Desea cargar un nuevo paciente SI [0] NO[1]' )asNumber asInteger.
 ]
 
 
@@ -329,7 +330,7 @@ Transcript show: 'Fecha minuta: ',auxMin fechaMinuta.
 Transcript cr.
 Transcript show: 'Fecha servicio: ',auxMin servicioMinuta fechaServicio.
 Transcript cr.
-Transcript show: 'Nombre y apellido paciente: ',auxMin servicioMinuta pacienteMinuta nombre, auxMin servicioMinuta pacienteMinuta apellido .
+Transcript show: 'Nombre y apellido paciente: ',auxMin servicioMinuta pacienteMinuta nombre, auxMin servicioMinuta pacienteMinuta apellido.
 Transcript cr.
 Transcript show: 'Descripcion servicio: ',auxMin servicioMinuta descripcion.
 Transcript cr.
@@ -354,20 +355,17 @@ MENU:
 6-Costo gimnasia
 0-Salir'.
 op:=(Prompter prompt: 'Ingrese opcion: ' )asNumber asInteger.
-[op=1|op=2|op=3|op=0|op=4|op=5|op=6]whileFalse: [
-op:=(Prompter prompt: 'Ingrese opcion: ' )asNumber asInteger.
-].
-[op=1]ifTrue: [
+(op=1)ifTrue: [
 self cargaLisProf .].
-[op=2]ifTrue: [
+(op=2)ifTrue: [
 self cargaObras .].
-[op=3]ifTrue: [
+(op=3)ifTrue: [
 self cargaPaciente.].
-[op=4]ifTrue: [
+(op=4)ifTrue: [
 self cargaMinuta .].
-[op=5]ifTrue: [
+(op=5)ifTrue: [
 self listadoObras .].
-[op=6]ifTrue: [
+(op=6)ifTrue: [
 Gimnasia asignarCosto .].
 ].
 ! !
@@ -581,7 +579,7 @@ Profesional comment: ''!
 
 cargaDatosProfe
 |espe|
-self cargaDatosPer.
+
 self tarifaConsulta: (Prompter prompt: 'Ingrese el costo de su consulta: ' )asNumber .
 self tarifaReunion: (Prompter prompt: 'Ingrese el costo de la reunion: ' )asNumber .
 self matricula: (Prompter prompt: 'Ingrese su numero de matricula: ' )asNumber .
