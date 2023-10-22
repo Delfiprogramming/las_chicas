@@ -151,7 +151,7 @@ opcion:= Prompter prompt: 'Desea agregar a un nuevo profesional: SI(0), NO(1)'
 !
 
 cargaMinuta
-|op op2 serv auxiliar auxCosto dni auxDni minuta profAleatorio espe|
+|op op2 serv auxiliar auxCosto dni auxDni minuta profAleatorio espe matri aux|
 op:=0.
 [op=0]whileTrue: [
 auxiliar:=nil.
@@ -174,7 +174,8 @@ op2:=(Prompter prompt: 'Ingrese el servicio que desea realizar el paciente: REUN
 (op2=1)ifTrue: [
 serv:= Reunion new.
 [auxiliar =nil]whileTrue: [
-profAleatorio:=(listadoProf at: (Random new next: listadoProf size)).
+matri := Prompter prompt: 'Ingrese la matricula del profesional: '.
+profAleatorio := self busquedaProfesional: matri.
 serv profesional:profAleatorio.
 auxCosto:=(Prompter prompt: 'Ingrese el costo de la reunion: ' ).
 auxCosto:=auxCosto+ profAleatorio costo.
@@ -196,14 +197,14 @@ auxiliar:=2.].].
 (op2=3)ifTrue: [
 serv:= Consulta new.
 [auxiliar =nil]whileTrue: [
-espe:=(Prompter  prompt: 'Ingrese la especialidad. MEDICO CLINICO(1), PSICOLOGO(2), NUTRICIONISTA(3)' )asNumber asInteger.
-(espe=1)ifTrue: [
+aux:=(Prompter  prompt: 'Ingrese la especialidad. MEDICO CLINICO(1), PSICOLOGO(2), NUTRICIONISTA(3)' ).
+(aux='1')ifTrue: [
 espe:='medico'.
 ].
-(espe=2)ifTrue: [
+(aux='2')ifTrue: [
 espe:='psicologo'.
 ].
-(espe=3)ifTrue: [
+(aux='3')ifTrue: [
 espe:='nutricionista'.
 ].
 profAleatorio:=(self busquedaProfEsp: espe) .
