@@ -25,11 +25,11 @@ package globalAliases: (Set new
 	yourself).
 
 package setPrerequisites: #(
-	'C:\Users\IPP\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin'
-	'C:\Users\IPP\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Legacy Date & Time'
-	'C:\Users\IPP\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Message Box'
-	'C:\Users\IPP\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\MVP\Presenters\Prompters\Dolphin Prompter'
-	'C:\Users\IPP\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\System\Random\Dolphin Random Stream').
+	'..\OneDrive\Documentos\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin'
+	'..\OneDrive\Documentos\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Legacy Date & Time'
+	'..\OneDrive\Documentos\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Message Box'
+	'..\OneDrive\Documentos\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\MVP\Presenters\Prompters\Dolphin Prompter'
+	'..\OneDrive\Documentos\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\System\Random\Dolphin Random Stream').
 
 package!
 
@@ -151,31 +151,25 @@ opcion:= Prompter prompt: 'Desea agregar a un nuevo profesional: SI(0), NO(1)'
 !
 
 cargaMinuta
-|op op2 op3 serv auxiliar auxCosto dni auxDni minuta profAleatorio espe|
+|op op2 serv auxiliar auxCosto dni auxDni minuta profAleatorio espe|
 op:=0.
 [op=0]whileTrue: [
-op3:=0.
 auxiliar:=nil.
 op2:=0.
-auxDni:=nil.
 
 
-[auxDni =nil & op3=0]whileTrue: [
+
 dni:=(Prompter prompt: 'Ingrese el numero de documento del paciente: ' )asNumber asInteger.
 auxDni:=self busquedaPaciente: dni.
 (auxDni =nil)ifTrue: [
-op3:=4.
-[op3=0|op3=1]whileFalse: [
-op3:=(Prompter prompt: 'No se encontro el paciente, desea ingresar otro? SI(0), NO(1):  ' )asNumber asInteger .]
-.].].
+MessageBox notify: 'No se encontro el paciente.' ].
 
 (auxDni~= nil)ifTrue: [
 minuta:= Minuta new.
 minuta fechaMinuta: (Date today).
 minuta peso: (Prompter prompt: 'Ingrese el peso del paciente: ' )asNumber.
 minuta pacienteMinuta: auxDni.
-[op2=2|op2=1|op2=3]whileFalse: [
-op2:=(Prompter prompt: 'Ingrese el servicio que desea realizar el paciente: REUNION(1),GIMNASIA(2),CONSULTA(3). ' )asNumber asInteger.].
+op2:=(Prompter prompt: 'Ingrese el servicio que desea realizar el paciente: REUNION(1),GIMNASIA(2),CONSULTA(3). ' )asNumber asInteger.
 
 (op2=1)ifTrue: [
 serv:= Reunion new.
@@ -187,7 +181,8 @@ auxCosto:=auxCosto+ profAleatorio costo.
 serv costo: auxCosto .
 serv fechaServicio: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la reunion: ' )).
 serv descripcion: (Prompter prompt: 'Ingrese la descripcion de la reunion: ' ).
-minuta servicioMinuta: serv.].].
+minuta servicioMinuta: serv.
+auxiliar:=2.].].
 
 (op2=2)ifTrue: [
 serv:= Gimnasia new.
@@ -195,15 +190,13 @@ serv:= Gimnasia new.
 serv fechaServicio: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la sesion de gimnasia: ' )).
 serv tipo: (Prompter prompt: 'Ingrese el tipo de gimnasia ' ).
 serv descripcion: (Prompter prompt: 'Ingrese la descripcion de la clase de gimnasia: ' ).
-minuta servicioMinuta: serv.].].
+minuta servicioMinuta: serv.
+auxiliar:=2.].].
 
 (op2=3)ifTrue: [
 serv:= Consulta new.
 [auxiliar =nil]whileTrue: [
-espe:=0.
-[espe=1|espe=2|espe =3]whileFalse: [
 espe:=(Prompter  prompt: 'Ingrese la especialidad. MEDICO CLINICO(1), PSICOLOGO(2), NUTRICIONISTA(3)' )asNumber asInteger.
-].
 (espe=1)ifTrue: [
 espe:='medico'.
 ].
@@ -218,12 +211,11 @@ serv profesional:profAleatorio.
 serv costo: profAleatorio costo.
 serv fechaServicio: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la consulta ' )).
 serv descripcion: (Prompter prompt: 'Ingrese la descripcion de la consulta: ' ).
-minuta servicioMinuta: serv.].].].
+minuta servicioMinuta: serv.
+auxiliar:=2.].].
 minutas add: minuta.
 
-op:=(Prompter prompt: 'Desea ingresar otra minuta SI(0) NO(1)' )asNumber asInteger .
-
-].
+op:=(Prompter prompt: 'Desea ingresar otra minuta SI(0) NO(1)' )asNumber asInteger .].]
 
 
 
@@ -269,8 +261,7 @@ obra:=(Prompter prompt: 'Ingrese codigo de su obra social: ' )asNumber asInteger
 aux:= self busquedaObra: obra.
 
 (aux=nil)ifTrue: [
-op2:=0.
-[op2=1|op2=2]whileFalse: [op2:=(Prompter prompt: 'Su obra social no es aceptada en la clinica. Desea continuar como paciente particular? SI(1)NO(2) ')asNumber asInteger].
+op2:=(Prompter prompt: 'Su obra social no es aceptada en la clinica. Desea continuar como paciente particular? SI(1)NO(2) ')asNumber asInteger.
 (op2=1)ifTrue: [
 paciente:= PacienteParticular new.
 paciente cargaDatosPer.
@@ -304,11 +295,11 @@ listadoObras
 |codObra fechaInicio fechaFin auxObra subObras listado suma auxMin op |
 op:=0.
 auxObra:=nil.
-[op=0|auxObra=nil]whileTrue: [
+[auxObra=nil]whileTrue: [
 codObra:=(Prompter prompt: 'Ingrese el codigo de la obra social' )asNumber asInteger .
 auxObra:= self busquedaObra: codObra.
 (auxObra=nil)ifTrue: [
-op:=(Prompter prompt: 'No se encontro la obra. Desea ingresar otra: SI(0) NO(1)' )asNumber asInteger.
+MessageBox notify: 'No se encontro la obra'.
 ].
 ].
 (auxObra ~= nil)ifTrue: [
