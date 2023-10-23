@@ -56,7 +56,7 @@ Object subclass: #Persona
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 Object subclass: #Servicio
-	instanceVariableNames: 'descripcion fechaServicio'
+	instanceVariableNames: 'descripcion fechaServicio costoSer'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -174,12 +174,13 @@ op2:=(Prompter prompt: 'Ingrese el servicio que desea realizar el paciente: REUN
 (op2=1)ifTrue: [
 serv:= Reunion new.
 [auxiliar =nil]whileTrue: [
-matri := Prompter prompt: 'Ingrese la matricula del profesional: '.
+matri :=( Prompter prompt: 'Ingrese la matricula del profesional: ')asNumber asInteger .
 profAleatorio := self busquedaProfesional: matri.
 serv profesional:profAleatorio.
-auxCosto:=(Prompter prompt: 'Ingrese el costo de la reunion: ' ).
-auxCosto:=auxCosto+ profAleatorio costo.
-serv costo: auxCosto .
+auxCosto:=(Prompter prompt: 'Ingrese el costo de la reunion: ' )asNumber.
+aux:= profAleatorio tarifaReunion.
+auxCosto:=auxCosto+aux.
+serv costoSer: auxCosto .
 serv fechaServicio: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la reunion: ' )).
 serv descripcion: (Prompter prompt: 'Ingrese la descripcion de la reunion: ' ).
 minuta servicioMinuta: serv.
@@ -197,19 +198,10 @@ auxiliar:=2.].].
 (op2=3)ifTrue: [
 serv:= Consulta new.
 [auxiliar =nil]whileTrue: [
-aux:=(Prompter  prompt: 'Ingrese la especialidad. MEDICO CLINICO(1), PSICOLOGO(2), NUTRICIONISTA(3)' ).
-(aux='1')ifTrue: [
-espe:='medico'.
-].
-(aux='2')ifTrue: [
-espe:='psicologo'.
-].
-(aux='3')ifTrue: [
-espe:='nutricionista'.
-].
-profAleatorio:=(self busquedaProfEsp: espe) .
-serv profesional:profAleatorio.
-serv costo: profAleatorio costo.
+matri:= (Prompter prompt: 'Ingrese la matricula')asNumber asInteger .
+profAleatorio:=self busquedaProfesional: matri.
+serv profesional: profAleatorio.
+serv costoSer: (profAleatorio tarifaConsulta ).
 serv fechaServicio: (Date fromString:(Prompter prompt: 'Ingrese la fecha de la consulta ' )).
 serv descripcion: (Prompter prompt: 'Ingrese la descripcion de la consulta: ' ).
 minuta servicioMinuta: serv.
@@ -293,15 +285,15 @@ minutas:= OrderedCollection new.
 !
 
 listadoObras
-|codObra fechaInicio fechaFin auxObra subObras listado suma auxMin op |
-op:=0.
+|codObra fechaInicio fechaFin auxObra subObras listado suma auxMin aux|
+
 auxObra:=nil.
 [auxObra=nil]whileTrue: [
 codObra:=(Prompter prompt: 'Ingrese el codigo de la obra social' )asNumber asInteger .
 auxObra:= self busquedaObra: codObra.
+].
 (auxObra=nil)ifTrue: [
 MessageBox notify: 'No se encontro la obra'.
-].
 ].
 (auxObra ~= nil)ifTrue: [
 subObras:= OrderedCollection new.
@@ -309,30 +301,32 @@ subObras:= self busquedaSubObras: codObra.
 fechaInicio:= Date fromString: (Prompter prompt: 'Ingrese la fecha de inicio' ).
 fechaFin:= Date fromString: (Prompter prompt: 'Ingrese la fecha de fin' ). 
 listado:=OrderedCollection new.
-listado:= subObras select: [:i | ((i servicioMinuta fechaServicio)>=fechaInicio )& ((i servicioMinuta fechaServicio)<=fechaFin ) ].
+listado:= subObras select: [:i | aux:= 0.
+((i servicioMinuta fechaServicio)>=fechaInicio )ifTrue: [
+((i servicioMinuta fechaServicio)<=fechaFin )ifTrue: [
+aux:=2.].].
+(aux=2).].
 suma:=0.
-Transcript show: 'Nombre de la obra social: ', auxObra nombre.
+Transcript show: 'Nombre de la obra social: ', auxObra nombre printString .
 Transcript cr.
-Transcript show: 'Porcentaje de cobertura: ', auxObra porcentaje .
+Transcript show: 'Porcentaje de cobertura: ', auxObra porcentaje printString.
 Transcript cr.
 Transcript cr.
-listado do: [:i | 
-auxMin:=i.
-Transcript show: 'Fecha minuta: ',auxMin fechaMinuta.
+1 to:  listado size do: [:i | 
+Transcript show: 'Fecha minuta: ',((listado at: i) fechaMinuta) printString.
 Transcript cr.
-Transcript show: 'Fecha servicio: ',auxMin servicioMinuta fechaServicio.
+Transcript show: 'Fecha servicio: ',(((listado at: i) servicioMinuta) fechaServicio) printString.
 Transcript cr.
-Transcript show: 'Nombre y apellido paciente: ',auxMin servicioMinuta pacienteMinuta nombre, auxMin servicioMinuta pacienteMinuta apellido.
+Transcript show: 'Nombre y apellido paciente: ',((((listado at: i) servicioMinuta) pacienteMinuta) nombre , (((listado at: i) servicioMinuta) pacienteMinuta) apellido) printString.
 Transcript cr.
-Transcript show: 'Descripcion servicio: ',auxMin servicioMinuta descripcion.
+Transcript show: 'Descripcion servicio: ',(((listado at: i) servicioMinuta) descripcion) printString.
 Transcript cr.
-Transcript show: 'Costo actividad: ',auxMin servicioMinuta costo.
-suma:=suma+((auxMin servicioMinuta costo)*(auxObra porcentaje)) / 100.
+Transcript show: 'Costo actividad: ',(((listado at: i) servicioMinuta )costo) printString.
+suma:=suma+((((listado at: i) servicioMinuta) costo)*(auxObra porcentaje)) / 100.
 Transcript cr.
-Transcript show: 'Importe a pagar por la obra social: ',((auxMin servicioMinuta costo)*(auxObra porcentaje)) / 100.].
+Transcript show: 'Importe a pagar por la obra social: ',((((listado at: i) servicioMinuta)costo)*(auxObra porcentaje)) / 100 printString.] .
 Transcript cr.
-Transcript show: 'Importe total a pagar por la obra social: ', suma.
-]!
+Transcript show: 'Importe total a pagar por la obra social: ', suma printString.].!
 
 menu
 |op|
@@ -632,15 +626,6 @@ tarifaReunion:!accessing!private! !
 Consulta guid: (GUID fromString: '{3c7cc168-0f3c-40bd-af01-b1fb37e7e741}')!
 Consulta comment: ''!
 !Consulta categoriesForClass!Kernel-Objects! !
-!Consulta methodsFor!
-
-asignaProfesional
-
-! !
-!Consulta categoriesForMethods!
-asignaProfesional!public! !
-!
-
 Gimnasia guid: (GUID fromString: '{811f99da-cb73-4030-8941-c48870c7fa1c}')!
 Gimnasia comment: ''!
 !Gimnasia categoriesForClass!Kernel-Objects! !
